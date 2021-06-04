@@ -20,7 +20,7 @@ get_youtube_rss <- function(u){
   rss <- NA
   if(!str_detect(string = u, pattern = "playlist")){
     rss <- h %>%
-      xml_text() %>%
+      xml2::xml_text() %>%
       str_extract("rssUrl*(.*?)*\\,") %>%
       str_remove("rssUrl") %>%
       str_sub(start = 4, end = -3)

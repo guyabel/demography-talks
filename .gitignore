@@ -3,3 +3,5 @@
 .RData
 twitter_pw.txt
 .httr-oauth
+keys.R
+.secrets

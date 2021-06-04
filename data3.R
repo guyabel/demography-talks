@@ -6,64 +6,38 @@
 
 library(tidyverse)
 library(googlesheets4)
-library(twitteR)
+library(rtweet)
 
-d <- read_csv("./data/feed.csv")
-d_old <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1JexzY17No_DgfXtDU5GEqYAKR7hbmSUcmZQwm86yCZ8/", sheet = "d")
+source("keys.R")
 
-d_new <- d %>%
-  filter(!entry_url %in% d_old$entry_url)
+# published (old)
+d0 <- read_sheet(ss = "https://docs.google.com/spreadsheets/d/1JexzY17No_DgfXtDU5GEqYAKR7hbmSUcmZQwm86yCZ8/", 
+                 sheet = "d")
+# complete list (new and old)
+d1 <- read_csv("./data/feed.csv")
 
-api_key <- 
-api_secret<- 
-access_token <- 
-access_token_secret <- 
+# just new
+d <- d1 %>%
+  filter(!entry_url %in% d0$entry_url) %>%
+  mutate(yt_url = str_replace(string = entry_url, pattern = "yt:video:",
+                              replacement = "https://www.youtube.com/watch?v="),
+         tweet = paste0(emojis$code[2036], " ", entry_title, "\n\n", 
+                        emojis$code[1739], " ", feed_title,  "\n\n", 
+                        # "#poptwitter", 
+                        yt_url))
 
-setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-
-twitteR::use_oauth_token()
-twitteR::
-rtweet::post_tweet(status = "This test tweet. #testtweet")
-
-tw = twitteR::searchTwitter('#realDonaldTrump + #HillaryClinton', n = 1e4, since = '2016-11-08', retryOnRateLimit = 1e3)
-d = twitteR::twListToDF(tw)
-
-
-
-# Create a token containing your Twitter keys
-create_token(
-  app = "demography-talks-tweets",  # the name of the Twitter app
-  consumer_key = Sys.getenv("kqstaCjkdzgsgrVwDKQY6ORph"),
-  consumer_secret = Sys.getenv("8GIHN3AbUuIZst5BDyQEai6gRdy8ybygR8AIAX5t5PS8fJNzMO"),
-  access_token = Sys.getenv("1395271160795860992-wRo8l3VIBXK1O5Rj7mzml6IzOwpQSA"),
-  access_secret = Sys.getenv("bKNkm7obqUjMO4zpaiRPKSJ5hqBlbjU7zfsnnLLdl99cb")
-)
+create_token(app = keys$app, 
+             consumer_key = keys$consumer_key, 
+             consumer_secret = keys$consumer_secret,
+             access_token = keys$access_token,
+             access_secret = keys$access_secret)
+            
+if(nrow(d) > 0){
+  for(i in 1:nrow(d)){
+    post_tweet(status = d$tweet[1])
+  }
+  # save complete list to google sheets
+  write_sheet(data = d1, ss = "https://docs.google.com/spreadsheets/d/1JexzY17No_DgfXtDU5GEqYAKR7hbmSUcmZQwm86yCZ8/", sheet = "d")
+}
 
 
-api_key <- Sys.getenv("kqstaCjkdzgsgrVwDKQY6ORph")
-api_secret <- Sys.getenv("8GIHN3AbUuIZst5BDyQEai6gRdy8ybygR8AIAX5t5PS8fJNzMO")
-access_token <- Sys.getenv("1395271160795860992-wRo8l3VIBXK1O5Rj7mzml6IzOwpQSA")
-access_token_secret <- Sys.getenv("bKNkm7obqUjMO4zpaiRPKSJ5hqBlbjU7zfsnnLLdl99cb")
-options(httr_oauth_cache = TRUE)
-
-setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-
-options(httr_oauth_cache = TRUE)
-setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-
-get_oauth_sig() 
-twitteR::lookupUsers("guyabelguyabel")
-rtweet::post_tweet(status = "This a test tweet. #testtweet")
-get_followers('arjbarker', n = 10) 
-
-kqstaCjkdzgsgrVwDKQY6ORph
-api_key <- Sys.getenv("twitter_api_key")
-api_secret <- Sys.getenv("twitter_api_secret")
-access_token <- Sys.getenv("twitter_access_token")
-access_token_secret <- Sys.getenv("twitter_access_token_secret")
-options(httr_oauth_cache = TRUE)
-setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
-
-# d <- d %>%
-#   slice(-(1:2))
-write_sheet(data = d, ss = "https://docs.google.com/spreadsheets/d/1JexzY17No_DgfXtDU5GEqYAKR7hbmSUcmZQwm86yCZ8/", sheet = "d")
