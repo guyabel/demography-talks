@@ -4,10 +4,19 @@
 ## data3 tweet and googlesheets update
 ##
 
+library.path <- .libPaths()
+# print(library.path)
+.libPaths(c("C:/Users/abel/Documents/R/R-4.0.3/library", .libPaths()))
+library.path <- .libPaths()
+# print(library.path)
+wd <- "C:/Users/abel/Documents/GitHub/demography-talks/"
+
 library(tidyverse)
 library(tidyRSS)
 
-y0 <- read_csv("./data/channels.csv")
+y0 <- paste0(wd, "/data/channels.csv") %>%
+  read_csv()
+# y0 <- read_csv("./data/channels.csv")
 
 y1 <- y0 %>%
   mutate(f = map(.x = url_feed, .f = ~tidyfeed(feed = .x)))
@@ -19,7 +28,7 @@ y2 <- y1 %>%
 
 y2 %>%
   select(entry_published, entry_url, entry_title, feed_title) %>%
-  write_csv("./data/feed.csv")
+  write_csv(paste0(wd, "/data/feed_new.csv"))
 
 # u = "https://vimeo.com/berkeleypopscience"
 # u = "https://vimeo.com/berkeleypopscience/videos/sort:date/format:detail"
